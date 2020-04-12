@@ -1,5 +1,6 @@
+package game
+
 object CardNum extends Enumeration {
-  val Ace = Value("A")
   val One = Value("1")
   val Two = Value("2")
   val Three = Value("3")
@@ -13,4 +14,5 @@ object CardNum extends Enumeration {
   val Jack = Value("J")
   val Queen = Value("Q")
   val King = Value("K")
+  val Ace = Value("A")
 }

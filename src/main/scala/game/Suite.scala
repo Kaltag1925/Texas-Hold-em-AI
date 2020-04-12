@@ -1,3 +1,5 @@
+package game
+
 object Suite extends Enumeration {
   val Hearts = Value("Hearts")
   val Clubs = Value("Clubs")
