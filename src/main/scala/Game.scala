@@ -23,16 +23,7 @@ class Game(a1: Agent, a2: Agent) {
   
   def getPot = pot
   
-  def makeMove(player: Agent, mv: Move.Value, amt: Int){
-    if(mv == Move.Bet){
-      minimumRaise = amt
-      pot += amt
-    }
-    if(round == 3){
-      done = true
-    }
-    turn *= -1
-  }
+
   
   def show(): Unit = {
     for(c <- a1.hand){

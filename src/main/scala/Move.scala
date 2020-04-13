@@ -1,7 +1,8 @@
 
+case class blind(betAmt: Int) extends Move(betAmt){
+  
+}
 
-object Move extends Enumeration {
-  val Check = Value("Check")
-  val Bet = Value("Bet")
-  val Fold = Value("Fold")
+abstract class Move(betAmt: Int) {
+
 }
