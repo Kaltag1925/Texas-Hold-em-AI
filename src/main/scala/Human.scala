@@ -1,36 +1,65 @@
-import agent.Agent
+import game.Card
+
 import scala.io.StdIn._
 
 class Human extends Agent {
-  private var moneyLeft
-  val hand = null;
+  private var moneyLeft = 10000
+  var hand = null.asInstanceOf[List[Card]]
   
-  def getMove(game: Game): (Move.Value, Int) = {
-    System.out.println("What's your move?")
+  def getMove(round: Round, minBet: Int, minIncrement: Int): Move = {
+    println(s"Hand: ${hand.mkString(", ")}")
+    println(s"River: ${round.getRiver().mkString(", ")}")
+    println("What's your move?")
+    if (minBet != 0)
+      println(s"Minimum bet is $minBet")
 
-    var m = ""
+    var move = null.asInstanceOf[Move]
+    while (move == null) {
+      val input = readLine().toLowerCase
+      input.split(" ").head match {
+        case "raise" =>
+          try {
+            val amt = input.split(" ")(1).toInt
+            if (amt > moneyLeft) {
+              println("cannot bet that much")
+            } else if (amt < minIncrement) {
+              println("too small of a raise")
+            } else {
+              moneyLeft -= amt
+              move = Raise(amt)
+            }
+          } catch {
+            case e: Exception => println("betting require a number")
+          }
 
-    while (m != "bet" && m != "fold" && m != "check") {
-      if (m == check && game.getMinimumRaise != 0) {
-        System.out.println("Cannot check")
-        m = ""
+        case "call" =>
+          if (minBet > moneyLeft) {
+            moneyLeft = 0
+            move = Call(moneyLeft)
+          } else {
+            moneyLeft -= minBet
+            move =  Call(minBet)
+          }
+
+        case "fold" =>
+          move = Fold()
+
+        case "check" =>
+          if (minBet > 0) {
+            println("cannot check")
+          } else {
+            move = Check()
+          }
       }
-      m = readLine().toLowerCase()
     }
-
-    if (m == "bet") {
-      System.out.println("How much?")
-      var bet = readInt()
-      while (bet < game.getMinimumRaise) {
-        System.out.println("Raise must be at least " + game.getMinimumRaise + " and no more than " + moneyLeft)
-        bet = readInt();
-      }
-      (Move.Bet, bet)
-    } else if (m == "fold") {
-      Move.Fold
-    } else {
-      Move.Check
-    }
+    return move
   }
 
+  override def allIn(): Boolean = moneyLeft == 0
+
+  override def pay(amt: Int): Unit = moneyLeft += amt
+
+  override def dealHand(cards: List[Card]): Unit = {
+    hand = cards
+  }
 }
