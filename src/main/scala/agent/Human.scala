@@ -1,6 +1,14 @@
-import game.Card
+package agent
 
+import game.Card
 import scala.io.StdIn._
+import game.Raise
+import game.Move
+import game.Fold
+import game.Check
+import game.Call
+import agent.Agent
+import game.Round
 
 class Human extends Agent {
   private var moneyLeft = 10000
