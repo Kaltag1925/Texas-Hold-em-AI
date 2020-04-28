@@ -10,11 +10,14 @@ import game.Call
 import agent.Agent
 import game.Round
 
-class Human extends Agent {
+class Human(val name: String) extends Agent {
   private var moneyLeft = 10000
   var hand = null.asInstanceOf[List[Card]]
   
   def getMove(round: Round, minBet: Int, minIncrement: Int): Move = {
+    println()
+    println("----------------")
+    println(s"$name What will you do?")
     println(s"Hand: ${hand.mkString(", ")}")
     println(s"River: ${round.getRiver().mkString(", ")}")
     println("What's your move?")

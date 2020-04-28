@@ -13,12 +13,12 @@ import agent.Agent
 class Round(blinds: Int, private var players: ListBuffer[Agent]) {
 
   private var shuffledDeck = util.Random.shuffle(Card.deck)
-  private val river = shuffledDeck.take(3)
-  shuffledDeck = shuffledDeck.drop(3)
+  private val river = shuffledDeck.take(5)
+  shuffledDeck = shuffledDeck.drop(5)
 
   private var pot = 0
   private var minimumRaise = 0
-  private var cardsLeftToFlip = 3
+  private var cardsLeftToFlip = 5
   private val bets = mutable.Map.from(players.map(a => (a, 0)))
 
   def getRiver(): List[Card] = {
@@ -33,77 +33,105 @@ class Round(blinds: Int, private var players: ListBuffer[Agent]) {
   def playRound(): Unit = {
     players.foreach(divideCards)
     //BlindsRound
-    var lastPlrToBet = players(0)
-    var currentPlayer = players(1)
-    var playerIndex = 1
-    var blindsIndex = 1
+    var lastPlrToBet = players.head
+    var currentPlayer = players.head
+    var playerIndex = 0
+    var blindsIndex = 0
     var betRequirement = blinds
-    while (currentPlayer != lastPlrToBet) {
+    var firstBet = true
+    while (firstBet || currentPlayer != lastPlrToBet) {
+      firstBet = false
       currentPlayer.getMove(this, betRequirement, minimumRaise) match {
         case Fold() =>
           players -= currentPlayer
+          playerIndex += 1
+          if (currentPlayer == lastPlrToBet) {
+            firstBet = true
+            lastPlrToBet = players(playerIndex)
+          }
+          currentPlayer = players(playerIndex)
         case Raise(betAmt) =>
           betRequirement = betRequirement max betAmt
           lastPlrToBet = currentPlayer
           pot += betAmt
           bets(currentPlayer) += betAmt
-          currentPlayer = players((playerIndex + 1) % players.size)
+          playerIndex += 1
+          currentPlayer = players(playerIndex % players.size)
         case Check() =>
-          currentPlayer = players((playerIndex + 1) % players.size)
+          playerIndex += 1
+          currentPlayer = players(playerIndex % players.size)
         case Call(betAmt) =>
           blindsIndex += 1
-          if (blindsIndex == 2) {
-            betRequirement = blinds / 2
+          if (blindsIndex < 3) {
+            betRequirement = blinds / blindsIndex
           } else if (blindsIndex == 3) {
             betRequirement = 0
           }
           pot += betAmt
           bets(currentPlayer) += betAmt
-          currentPlayer = players((playerIndex + 1) % players.size)
+          playerIndex += 1
+          currentPlayer = players(playerIndex % players.size)
       }
-
-      //Flop
-
-      cardsLeftToFlip -= 1
-      river.drop(cardsLeftToFlip).foreach(println)
-
-      while (players.size > 1 || players.forall(_.allIn()) || cardsLeftToFlip <= 0) {
-        playBetRound()
-        cardsLeftToFlip -= 1
-        river.drop(cardsLeftToFlip).foreach(println)
-      }
-
-      val hands = players.map(a => (a, WinningHand(a.hand ++ river)))
-      val winner = hands.maxBy({
-        case (_, hand) => hand
-      })._1
-
-      winner.pay(pot)
-
     }
+
+    //Flop
+
+    cardsLeftToFlip -= 3
+
+    while ((players.size > 1 || players.forall(_.allIn())) && cardsLeftToFlip > 0) {
+      playBetRound()
+      cardsLeftToFlip -= 1
+      println(cardsLeftToFlip)
+    }
+
+    val hands = players.map(p => (p, findPlayerBestHand(p)))
+    val (winner, hand) = hands.maxBy({
+      case (_, hand) => hand
+    })
+
+    println(s"Winner is $winner, with a hand of ${hand.hand}")
+    winner.pay(pot)
   }
 
-  def playBetRound(): Unit = {
-    var lastPlrToBet = players(0)
-    var currentPlayer = players(1)
-    var playerIndex = 1
+  private def findPlayerBestHand(a: Agent): WinningHand = {
+    val cards = a.hand ++ river
+    val combinations = cards.combinations(5)
+    val winningHands = combinations.map(WinningHand.apply)
+    winningHands.max
+  }
+
+  private def playBetRound(): Unit = {
+    var lastPlrToBet = players.head
+    var currentPlayer = players.head
+    var firstBet = true
+    var playerIndex = 0
     var betRequirement = 0
-    while (currentPlayer != lastPlrToBet) {
+    while (firstBet || currentPlayer != lastPlrToBet) {
+      firstBet = false
       currentPlayer.getMove(this, betRequirement, minimumRaise) match {
         case Fold() =>
           players -= currentPlayer
+          playerIndex += 1
+          if (currentPlayer == lastPlrToBet) {
+            firstBet = true
+            lastPlrToBet = players(playerIndex)
+          }
+          currentPlayer = players(playerIndex)
         case Raise(betAmt) =>
           betRequirement = betRequirement max betAmt
           lastPlrToBet = currentPlayer
           pot += betAmt
           bets(currentPlayer) += betAmt
-          currentPlayer = players((playerIndex + 1) % players.size)
+          playerIndex += 1
+          currentPlayer = players(playerIndex % players.size)
         case Check() =>
-          currentPlayer = players((playerIndex + 1) % players.size)
+          playerIndex += 1
+          currentPlayer = players(playerIndex % players.size)
         case Call(betAmt) =>
           pot += betAmt
           bets(currentPlayer) += betAmt
-          currentPlayer = players((playerIndex + 1) % players.size)
+          playerIndex += 1
+          currentPlayer = players(playerIndex % players.size)
       }
     }
   }

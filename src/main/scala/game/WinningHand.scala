@@ -11,19 +11,19 @@ object WinningHand {
       val maxComboSize = counts.values.max
       if (maxComboSize == 4) {
         val swapped = counts.map(_.swap)
-        FourKind(swapped(4), swapped(1))
+        FourKind(swapped(4), swapped(1), sorted)
 
       } else if (maxComboSize == 3) {
         if (counts.size == 2) {
           // 2 sets a 3x and 2x
           val swapped = counts.map(_.swap)
-          FullHouse(swapped(3), swapped(2))
+          FullHouse(swapped(3), swapped(2), sorted)
 
         } else {
           // 3 sets 3x 1x and 1x
           val others = counts.filter(_._2 == 1).keys.toList.sorted.reverse
           val swapped = counts.map(_.swap)
-          ThreeKind(swapped(3), others)
+          ThreeKind(swapped(3), others, sorted)
         }
 
       } else { // Max combo is 2
@@ -31,12 +31,12 @@ object WinningHand {
           // 3 sets 2x 2x 1x
           val pairs = counts.filter(_._2 == 2).keys.toList.sorted.reverse
           val swapped = counts.map(_.swap)
-          TwoPair(pairs, List(swapped(1)))
+          TwoPair(pairs, List(swapped(1)), sorted)
         } else {
           // 4 sets 2x 1x 1x 1x
           val others = counts.filter(_._2 == 1).keys.toList.sorted.reverse
           val swapped = counts.map(_.swap)
-          OnePair(swapped(2), others)
+          OnePair(swapped(2), others, sorted)
         }
       }
     } else {
@@ -44,25 +44,25 @@ object WinningHand {
       if (orderStatus == AllLegal) {
         if (sameSuit(sorted)) {
           if (sorted.head.num == CardNum.Ace) {
-            RoyalFlush() // Congratulations
+            RoyalFlush(hand) // Congratulations
           } else {
-            StraightFlush(sorted.head.num)
+            StraightFlush(hand)
           }
         } else {
-          Straight(sorted.head.num)
+          Straight(hand)
         }
       } else if (orderStatus == StraightLegal) {
         if (sameSuit(sorted)) {
-          Flush(sorted.map(_.num))
+          Flush(sorted)
         } else {
-          Straight(sorted.head.num)
+          Straight(sorted)
         }
       } else {
         // Not in perfect order
         if (sameSuit(sorted)) {
-          Flush(sorted.map(_.num))
+          Flush(sorted)
         } else {
-          HighCard(sorted.map(_.num))
+          HighCard(sorted)
         }
       }
     }
@@ -112,123 +112,43 @@ object WinningHand {
   }
 }
 
-abstract class WinningHand(val rank: Int) extends Ordered[WinningHand] {
-  def compare(that: WinningHand): Int = this.rank - that.rank
-}
-
-case class HighCard(cards: List[CardNum.Value]) extends WinningHand(0){
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case HighCard(thatCards) => WinningHand.compareFirstDifferentCard(cards, thatCards)
-      case other => super.compare(other)
+abstract class WinningHand(val rank: Int, val hand: List[Card], val compareHand: List[CardNum.Value]) extends Ordered[WinningHand] {
+  def compare(that: WinningHand): Int = {
+    if (this.getClass == that.getClass) {
+      WinningHand.compareFirstDifferentCard(this.compareHand, that.compareHand)
+    } else {
+      this.rank - that.rank
     }
   }
 }
 
-case class OnePair(pair: CardNum.Value, cards: List[CardNum.Value]) extends WinningHand(1) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case OnePair(thatPair, thatCards) =>
-        if (pair == thatPair) {
-          WinningHand.compareFirstDifferentCard(cards, thatCards)
-        } else {
-          pair.compare(thatPair)
-        }
-      case other => super.compare(other)
-    }
-  }
-}
+case class HighCard(cards: List[Card])
+  extends WinningHand(0, cards, cards.map(_.num))
 
-case class TwoPair(pairs: List[CardNum.Value], cards: List[CardNum.Value]) extends WinningHand(2) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case TwoPair(thatPairs, thatCards) =>
-        val pairCompare = WinningHand.compareFirstDifferentCard(pairs, thatPairs)// I wanted to write it as pairComPAIR
-        if (pairCompare == 0) {
-          WinningHand.compareFirstDifferentCard(cards, thatCards)
-        } else {
-          pairCompare
-        }
-      case other => super.compare(other)
-    }
-  }
-}
+case class OnePair(pair: CardNum.Value, extraCards: List[CardNum.Value], cards: List[Card])
+  extends WinningHand(1, cards, (pair :: extraCards))
 
-case class ThreeKind(kind: CardNum.Value, cards: List[CardNum.Value]) extends WinningHand(3) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case ThreeKind(thatKind, thatCards) =>
-        if (kind == thatKind) {
-          WinningHand.compareFirstDifferentCard(cards, thatCards)
-        } else {
-          kind.compare(thatKind)
-        }
-      case other => super.compare(other)
-    }
-  }
-}
+case class TwoPair(pairs: List[CardNum.Value], extraCards: List[CardNum.Value], cards: List[Card])
+  extends WinningHand(2, cards, (pairs ::: extraCards))
 
-case class Straight(highestCard: CardNum.Value) extends WinningHand(4) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case Straight(thatHighestCard) => highestCard.compare(thatHighestCard)
-      case other => super.compare(other)
-    }
-  }
-}
+case class ThreeKind(kind: CardNum.Value, extraCards: List[CardNum.Value], cards: List[Card])
+  extends WinningHand(3, cards, (kind :: extraCards))
 
-case class Flush(cards: List[CardNum.Value]) extends WinningHand(5) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case Flush(thatCards) =>
-        WinningHand.compareFirstDifferentCard(cards, thatCards)
-      case other => super.compare(other)
-    }
-  }
-}
+case class Straight(cards: List[Card])
+  extends WinningHand(4, cards, List(cards.max.num))
 
-case class FullHouse(threeKind: CardNum.Value, twoKind: CardNum.Value) extends WinningHand(6) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case FullHouse(thatThreeKind, thatTwoKind) =>
-        if (threeKind == thatThreeKind) {
-          twoKind.compare(thatTwoKind)
-        } else {
-          threeKind.compare(thatThreeKind)
-        }
-      case other => super.compare(other)
-    }
-  }
-}
+case class Flush(cards: List[Card])
+  extends WinningHand(5, cards, cards.map(_.num))
 
-case class FourKind(kind: CardNum.Value, extra: CardNum.Value) extends WinningHand(7) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case FourKind(thatKind, thatExtra) =>
-        if (kind == thatKind) {
-          extra.compare(thatExtra)
-        } else {
-          kind.compare(thatKind)
-        }
-      case other => super.compare(other)
-    }
-  }
-}
+case class FullHouse(threeKind: CardNum.Value, twoKind: CardNum.Value, cards: List[Card])
+  extends WinningHand(6, cards, List(threeKind, twoKind))
 
-case class StraightFlush(highestCard: CardNum.Value) extends WinningHand(8) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case StraightFlush(thatHighestCard) => highestCard.compare(thatHighestCard)
-      case other => super.compare(other)
-    }
-  }
-}
+case class FourKind(kind: CardNum.Value, extra: CardNum.Value, cards: List[Card])
+  extends WinningHand(7, cards, List(kind, extra))
 
-case class RoyalFlush() extends WinningHand(9) {
-  override def compare(that: WinningHand): Int = {
-    that match {
-      case _: RoyalFlush => 0
-      case other => super.compare(other)
-    }
-  }
+case class StraightFlush(cards: List[Card])
+  extends WinningHand(8, cards, List(cards.max.num))
+
+case class RoyalFlush(cards: List[Card])
+  extends WinningHand(9, cards, Nil) {
 }

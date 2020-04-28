@@ -8,14 +8,13 @@ import game.Round
 object Executor extends App {
   
   private def runGame(a1: Agent, a2: Agent): Unit = {
-    val round = new Round(400, ListBuffer(a1, a2));
-    round.playRound()
-
+    val game = new Game(List(a1, a2))
+    game.play()
   }
   
   
   
-  runGame(new Human(), new Human())
+  runGame(new Human("Player 1"), new Human("Player 2"))
   
   
 }
