@@ -39,12 +39,12 @@ class Round(blinds: Int, private var players: ListBuffer[Agent]) {
     var blindsIndex = 0
     var betRequirement = blinds
     var firstBet = true
-    while (firstBet || currentPlayer != lastPlrToBet) {
+    while ((firstBet || currentPlayer != lastPlrToBet) && players.size > 1) {
       firstBet = false
       currentPlayer.getMove(this, betRequirement, minimumRaise) match {
         case Fold() =>
           players -= currentPlayer
-          playerIndex += 1
+          playerIndex = playerIndex % players.size
           if (currentPlayer == lastPlrToBet) {
             firstBet = true
             lastPlrToBet = players(playerIndex)
@@ -81,7 +81,7 @@ class Round(blinds: Int, private var players: ListBuffer[Agent]) {
     while ((players.size > 1 || players.forall(_.allIn())) && cardsLeftToFlip > 0) {
       playBetRound()
       cardsLeftToFlip -= 1
-      println(cardsLeftToFlip)
+      //println(cardsLeftToFlip)
     }
 
     val hands = players.map(p => (p, findPlayerBestHand(p)))
@@ -106,12 +106,12 @@ class Round(blinds: Int, private var players: ListBuffer[Agent]) {
     var firstBet = true
     var playerIndex = 0
     var betRequirement = 0
-    while (firstBet || currentPlayer != lastPlrToBet) {
+    while ((firstBet || currentPlayer != lastPlrToBet) && players.size > 1) {
       firstBet = false
       currentPlayer.getMove(this, betRequirement, minimumRaise) match {
         case Fold() =>
           players -= currentPlayer
-          playerIndex += 1
+          playerIndex = playerIndex % players.size
           if (currentPlayer == lastPlrToBet) {
             firstBet = true
             lastPlrToBet = players(playerIndex)

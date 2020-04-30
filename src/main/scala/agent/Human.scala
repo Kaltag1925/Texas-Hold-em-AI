@@ -13,10 +13,13 @@ import game.Round
 class Human(val name: String) extends Agent {
   private var moneyLeft = 10000
   var hand = null.asInstanceOf[List[Card]]
+
+  def getMoney = moneyLeft
   
   def getMove(round: Round, minBet: Int, minIncrement: Int): Move = {
     println()
     println("----------------")
+    println("You have $" + moneyLeft + " left")
     println(s"$name What will you do?")
     println(s"Hand: ${hand.mkString(", ")}")
     println(s"River: ${round.getRiver().mkString(", ")}")
