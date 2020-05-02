@@ -1,11 +1,14 @@
 package agent
-import game.{Call, Card, Fold, Move, Round, WinningHand}
+import game.{Call, Card, Fold, Game, Move, PlayerList, Round, WinningHand}
 
+import util.Random
 import util.control.Breaks._
 
-class MCTSAgent(val name: String) extends Agent {
+class MCTSAgent(val name: String, val game: Game, var round: Round) extends Agent {
   private var moneyLeft = 10000
   var hand: List[Card] = null.asInstanceOf[List[Card]]
+  val r = new Random
+  val plrToNum = round.getPlayers().zipWithIndex.toMap
 
 //  def getBeginningHands(): List[WinningHand] = {
 //    Card.deck.diff(hand).combinations(3).map(_ ::: hand).map(WinningHand.apply).toList
@@ -77,7 +80,24 @@ class MCTSAgent(val name: String) extends Agent {
     ???
   }
 
-  def rollout(leaf: Node): Int = ???
+  def rollout(leaf: Node): Int = {
+    var players = leaf.playerList.inGame
+    leaf.isVisited = true
+    var turn = leaf.playerList
+    var validMoves = if(leaf.round == 5) List.empty else List(Fold, Call)
+    var rolloutRound = round.copy()
+    while(!validMoves.isEmpty){
+      val rand = r.nextInt(validMoves.size)
+      rolloutRound = round.simulateMove(rolloutRound, validMoves(rand))
+      validMoves = if(leaf.round == 5) List.empty else List(Fold, Call)
+      turn.next
+    }
+    val hands = players.map(p => (p, round.findPlayerBestHand(p)))
+    val (winner, hand) = hands.maxBy({
+      case (_, hand) => hand
+    })
+    plrToNum(winner)
+  }
 
   def randomMove(minAmt: Int): Move = {
     if (math.random() > 0.5) {
@@ -89,7 +109,16 @@ class MCTSAgent(val name: String) extends Agent {
 
   def backpropagate(node: Node, result: Int): Unit = ??? //turns
 
-  def addChildren(node: Node): Unit = ???
+  def addChildren(node: Node): Unit = {
+    var validMoves = if(node.round == 5) List.empty else List(Fold, Call)
+    for(m: Move <- validMoves){
+      var newChild = new Node(node.round+1,node.playerList)
+      newChild.moveToGetHere = m
+      newChild.playerList.next()
+      newChild.parent = node
+
+    }
+  }
 
   def checkNodeExpansion(node: Node): Unit = {
     if(node.children.isEmpty){

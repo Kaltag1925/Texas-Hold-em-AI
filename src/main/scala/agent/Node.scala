@@ -1,17 +1,18 @@
 package agent
 
-import game.Move
+import game.{Move, PlayerList}
 
-class Node() {
+class Node(r: Int, plrList: PlayerList) {
+  val round = r
   var isExpanded = false
   var isVisited = false
   var parent: Node = null.asInstanceOf[Node]
   var children: List[Node] = List()
   var simulations = 0
   var wins = 0.0
-  //var boardState: Nothing = null
-  var turn = -1
+  val action: Move = null
   var isTerminal = false
+  var playerList = plrList
   var winner = -1
   var moveToGetHere: Move = null.asInstanceOf[Move]
 
@@ -38,9 +39,11 @@ class Node() {
     (wins/(0.0 + simulations)) + (1.41*Math.sqrt(Math.log(parent.simulations) / (0.0 + simulations)))
   }
 
-//  def printNode(): Unit = {
-//    println("===== Node Begin =====")
-//
-//  }
+  def printNode(): Unit = {
+    println("===== Node Begin =====")
+    println("round = " + round + ", wins: " + wins + ", simulations: " + simulations + ", uct: " + uct() + ", turn: " + playerList.currentTurn +
+      ", isTerminal: " + isTerminal + ", winner: " + winner +
+      ", moveToGetHere: " + moveToGetHere)
+  }
 
 }
