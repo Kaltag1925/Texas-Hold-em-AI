@@ -1,14 +1,30 @@
 package agent
-import game.{Card, Move, Round}
+import game.{Call, Card, Fold, Move, Round, WinningHand}
+
 import util.control.Breaks._
 
 class MCTSAgent(val name: String) extends Agent {
   private var moneyLeft = 10000
   var hand: List[Card] = null.asInstanceOf[List[Card]]
 
-  def getAllHands(): List[List[Card]] = {
-    Card.deck.diff(hand).combinations(3).map(_ ::: hand).toList
-  }
+//  def getBeginningHands(): List[WinningHand] = {
+//    Card.deck.diff(hand).combinations(3).map(_ ::: hand).map(WinningHand.apply).toList
+//  }
+
+//  def getAllHands(round: Round): List[WinningHand] = {
+//    val knownCards = hand ::: round.getRiver()
+//    val unknownCards = 7 - knownCards.size
+//    val cardsLeft = Card.deck.diff(knownCards)
+//    (for (i <- 0 to unknownCards) yield {
+//      knownCards.combinations(knownCards.size - i).flatMap(known => cardsLeft.combinations(i)).map(WinningHand.apply).toList
+//    }).flatten.toList
+////
+////    if (unknownCards == 2) {
+////      WinningHand(knownCards) :: knownCards.combinations(4).flatMap(known => cardsLeft.map(_ :: known)).map(WinningHand.apply).toList ::: knownCards.combinations(3).flatMap(known => cardsLeft.combinations(2).map(_ ::: known)).map(WinningHand.apply).toList
+////    } else {
+////      knownCards.combinations(5).map(WinningHand.apply).toList ::: knownCards.combinations(4).flatMap(known => cardsLeft.map(_ :: known)).map(WinningHand.apply).toList
+////    }
+//  }
 
   def getOdds(): Unit = ???
 
@@ -58,9 +74,18 @@ class MCTSAgent(val name: String) extends Agent {
         }
       }
     }
+    ???
   }
 
   def rollout(leaf: Node): Int = ???
+
+  def randomMove(minAmt: Int): Move = {
+    if (math.random() > 0.5) {
+      Fold()
+    } else {
+      Call(minAmt)
+    }
+  }
 
   def backpropagate(node: Node, result: Int): Unit = ??? //turns
 
@@ -87,4 +112,6 @@ class MCTSAgent(val name: String) extends Agent {
   override def dealHand(cards: List[Card]): Unit = {
     hand = cards
   }
+
+  override def getMove(round: Round, minAmt: Int, minimumRaise: Int): Move = ???
 }
