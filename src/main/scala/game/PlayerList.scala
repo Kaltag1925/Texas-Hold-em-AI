@@ -4,12 +4,13 @@ import agent.Agent
 
 import scala.collection.mutable
 
-class PlayerList(players: List[Agent]) {
+class PlayerList(players: List[Agent], firstPlayer: Agent) {
   import PlayerList._
-  private val _inGame: mutable.Set[Agent] = mutable.Set()
+  private val _inGame: mutable.Buffer[Agent] = mutable.Buffer()
   _inGame.addAll(players)
   private var _size = players.size
   private var first = new Node(null, players.head, null)
+  private var current = first
 
   {
     var c = first
@@ -18,9 +19,18 @@ class PlayerList(players: List[Agent]) {
       c = c.next
     }
     c.next = new Node(c, players.last, first)
-  }
 
-  private var current = first
+    var rover = first.next
+    var found = false
+    while (rover != first && !found) {
+      if (rover.data == firstPlayer) {
+        found = true
+        first = rover
+      }
+
+      rover = rover.next
+    }
+  }
 
   def isFirst: Boolean = current == first
 
@@ -38,7 +48,7 @@ class PlayerList(players: List[Agent]) {
   def size: Int = _size
 
   def remove(): Unit = {
-    _inGame.remove(current.data)
+    _inGame -= (current.data)
     if (current == first) {
       first = current.next
     }
@@ -62,8 +72,18 @@ class PlayerList(players: List[Agent]) {
 
   def inGame: List[Agent] = _inGame.toList
   def currentTurn: Agent = current.data
+
+  override def clone: PlayerList = {
+    val index = _inGame.indexOf(current.data)
+    val (before, after) = _inGame.toList.splitAt(index)
+    new PlayerList(after ::: before, first.data)
+  }
 }
 
 object PlayerList {
   private class Node(var prev: Node, var data: Agent, var next: Node)
+
+  def apply(players: List[Agent]): PlayerList = {
+    new PlayerList(players, players.head)
+  }
 }

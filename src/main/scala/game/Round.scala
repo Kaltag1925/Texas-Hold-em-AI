@@ -11,7 +11,7 @@ import game.Call
 import agent.Agent
 
 class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
-  val players = new PlayerList(playersIn.toList)
+  val players = PlayerList(playersIn.toList)
 
   private var shuffledDeck = util.Random.shuffle(Card.deck)
   private val river = shuffledDeck.take(5)
