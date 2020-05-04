@@ -1,5 +1,5 @@
 package agent
-import game.{Call, Card, Fold, Move, PlayerList, Round, WinningHand}
+import game.{Call, Card, Flush, Fold, FourKind, FullHouse, Move, OnePair, PlayerList, Round, RoyalFlush, Straight, StraightFlush, ThreeKind, TwoPair, WinningHand}
 
 class ExpectimaxAgent(val name: String) extends Agent {
   import ExpectimaxAgent._
@@ -19,7 +19,23 @@ class ExpectimaxAgent(val name: String) extends Agent {
     next
   }
 
-  def scoreHand(node: Node): Int = ???
+  def scoreHand(node: Node): Int = {
+    val cards = hand ++ node.river
+    val combinations = cards.combinations(5)
+    val bestHand = combinations.map(WinningHand.apply).max
+    bestHand match {
+      case RoyalFlush(cards) => 100
+      case StraightFlush(cards) => 90
+      case FourKind(kind, extra, cards) => 80
+      case FullHouse(threeKind, twoKind, cards) => 70
+      case Flush(cards) => 60
+      case Straight(cards) => 30
+      case ThreeKind(kind, extraCards, cards) => 10
+      case TwoPair(pairs, extraCards, cards) => 5
+      case OnePair(pair, extraCards, cards) => 1
+      case c => 0
+    }
+  }
 
   override def getMove(round: Round, minAmt: Int, minimumRaise: Int): Move = {
 
