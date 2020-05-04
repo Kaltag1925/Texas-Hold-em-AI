@@ -48,13 +48,14 @@ class ExpectimaxAgent(val name: String) extends Agent {
         }
       } else {
         node.children.map(expectimax).max
-      }
+        }
     }
 
     def buildTree(root: Node, depth: Int): Unit = {
 
         val unknownCards = getUnknownCards(root.river)
         val validMoves = List(Call(minAmt), Fold())
+        println(validMoves.length)
         if (root.playerList.hasNext) {
           val kids = validMoves.map(m => new PlayerNode(root, List.empty, nextPlayerList(root.playerList), m, root.river))
           root.children = kids
@@ -65,9 +66,6 @@ class ExpectimaxAgent(val name: String) extends Agent {
             root.children = kids
             kids.foreach(k => buildTree(k, depth - 1))
           }
-          else {
-
-          }
         }
     }
 
@@ -75,7 +73,9 @@ class ExpectimaxAgent(val name: String) extends Agent {
     buildTree(root, 3)
 
     try {
-      root.children.maxBy(expectimax).asInstanceOf[PlayerNode].moveMade
+      val expectimaxVal = root.children.maxBy(expectimax).asInstanceOf[PlayerNode].moveMade
+      println(expectimaxVal)
+      expectimaxVal
     } catch {
       case e: ClassCastException => throw new Exception ("Was a chance node not a player node")
     }

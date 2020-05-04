@@ -40,7 +40,7 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
 
     cardsLeftToFlip -= 3
 
-    while ((players.size > 1 || players.forall(_.allIn())) && cardsLeftToFlip > 0) {
+    while ((players.size > 1 || players.forall(_.allIn())) && cardsLeftToFlip > -1) { //TODO
       playBetRound(false)
       cardsLeftToFlip -= 1
       //println(cardsLeftToFlip)
@@ -48,7 +48,7 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
 
     val (winner, hand) = findWinner(players.inGame.map(p => (p, p.hand)), river)
 
-    println(s"Winner is $winner, with a hand of ${hand.hand}")
+    println(s"Winner is ${winner.name}, with a hand of ${hand.hand}")
     winner.pay(pot)
   }
 
@@ -75,7 +75,7 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
     while ((firstBet || !players.isFirst) && players.size > 1) {
       blindsIndex += 1
       if (blindsIndex < 3 && doBlinds)
-        betRequirement = blinds / blindsIndex
+        betRequirement = blinds / blindsIndex //TODO
       firstBet = false
       players.currentTurn.getMove(this, betRequirement, minimumRaise) match {
         case Fold() =>

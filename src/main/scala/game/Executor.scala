@@ -1,8 +1,7 @@
 package game
 
 import scala.collection.mutable.ListBuffer
-import agent.Human
-import agent.Agent
+import agent.{Agent, ExpectimaxAgent, Human}
 import game.Round
 
 object Executor extends App {
@@ -12,8 +11,8 @@ object Executor extends App {
   }
   
   
-  
-  runGame(new Human("Player 1"), new Human("Player 2"))
+
+  runGame(new ExpectimaxAgent("Player 1"), new Human("Player 2"))
   
   
 }

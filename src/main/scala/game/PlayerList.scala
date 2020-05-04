@@ -49,15 +49,22 @@ class PlayerList(players: List[Agent], firstPlayer: Agent) {
 
   def remove(): Unit = {
     _inGame -= (current.data)
-    if (current == first) {
-      first = current.next
+    if (_size == 2) {
+      current = current.next
+      current.prev = null
+      current.next = null
+      first = current
+      _size -= 1
+    } else {
+      if (current == first) {
+        first = current.next
+      }
+      current = current.next
+      current.prev = current.prev.prev
+      current.prev.next = current
+      _size -= 1
     }
-    current = current.next
-    current.prev = current.prev.prev
-    current.prev.next = current
-    _size -=1
   }
-
   def foreach(f: Agent => Unit): Unit = {
     _inGame.foreach(f)
   }
