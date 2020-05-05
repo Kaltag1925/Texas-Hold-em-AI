@@ -6,35 +6,35 @@ case class Card(suit: Suite.Value, num: CardNum.Value) extends Ordered[Card] {
 
 object Card {
   val deck: List[Card] = List(
-    Card(Suite.Clubs, CardNum.Ace),
-    Card(Suite.Clubs, CardNum.Two),
-    Card(Suite.Clubs, CardNum.Three),
-    Card(Suite.Clubs, CardNum.Four),
-    Card(Suite.Clubs, CardNum.Five),
-    Card(Suite.Clubs, CardNum.Six),
-    Card(Suite.Clubs, CardNum.Seven),
-    Card(Suite.Clubs, CardNum.Eight),
-    Card(Suite.Clubs, CardNum.Nine),
-    Card(Suite.Clubs, CardNum.Ten),
-    Card(Suite.Clubs, CardNum.Jack),
-    Card(Suite.Clubs, CardNum.Queen),
-    Card(Suite.Clubs, CardNum.King),
-    
-    // Spades
-
-    Card(Suite.Spades, CardNum.Ace),
-    Card(Suite.Spades, CardNum.Two),
-    Card(Suite.Spades, CardNum.Three),
-    Card(Suite.Spades, CardNum.Four),
-    Card(Suite.Spades, CardNum.Five),
-    Card(Suite.Spades, CardNum.Six),
-    Card(Suite.Spades, CardNum.Seven),
-    Card(Suite.Spades, CardNum.Eight),
-    Card(Suite.Spades, CardNum.Nine),
-    Card(Suite.Spades, CardNum.Ten),
-    Card(Suite.Spades, CardNum.Jack),
-    Card(Suite.Spades, CardNum.Queen),
-    Card(Suite.Spades, CardNum.King),
+//    Card(Suite.Clubs, CardNum.Ace),
+//    Card(Suite.Clubs, CardNum.Two),
+//    Card(Suite.Clubs, CardNum.Three),
+//    Card(Suite.Clubs, CardNum.Four),
+//    Card(Suite.Clubs, CardNum.Five),
+//    Card(Suite.Clubs, CardNum.Six),
+//    Card(Suite.Clubs, CardNum.Seven),
+//    Card(Suite.Clubs, CardNum.Eight),
+//    Card(Suite.Clubs, CardNum.Nine),
+//    Card(Suite.Clubs, CardNum.Ten),
+//    Card(Suite.Clubs, CardNum.Jack),
+//    Card(Suite.Clubs, CardNum.Queen),
+//    Card(Suite.Clubs, CardNum.King),
+//
+//    // Spades
+//
+//    Card(Suite.Spades, CardNum.Ace),
+//    Card(Suite.Spades, CardNum.Two),
+//    Card(Suite.Spades, CardNum.Three),
+//    Card(Suite.Spades, CardNum.Four),
+//    Card(Suite.Spades, CardNum.Five),
+//    Card(Suite.Spades, CardNum.Six),
+//    Card(Suite.Spades, CardNum.Seven),
+//    Card(Suite.Spades, CardNum.Eight),
+//    Card(Suite.Spades, CardNum.Nine),
+//    Card(Suite.Spades, CardNum.Ten),
+//    Card(Suite.Spades, CardNum.Jack),
+//    Card(Suite.Spades, CardNum.Queen),
+//    Card(Suite.Spades, CardNum.King),
     
     // Diamonds
 

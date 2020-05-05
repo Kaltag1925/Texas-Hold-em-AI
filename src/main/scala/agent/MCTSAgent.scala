@@ -1,6 +1,0 @@
-package agent
-
-class MCTSAgent {
-
-
-}

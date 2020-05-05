@@ -11,7 +11,7 @@ import agent.Agent
 import game.Round
 
 class Human(val name: String) extends Agent {
-  private var moneyLeft = 10000
+  private var moneyLeft = 1000
   var hand = null.asInstanceOf[List[Card]]
 
   def getMoney = moneyLeft
@@ -43,7 +43,7 @@ class Human(val name: String) extends Agent {
               move = Raise(amt)
             }
           } catch {
-            case e: Exception => println("betting require a number")
+            case e: Exception => println("betting requires a number")
           }
 
         case "call" =>
@@ -64,6 +64,9 @@ class Human(val name: String) extends Agent {
           } else {
             move = Check()
           }
+
+        case _ =>
+          println("Incorrect input try\n- raise [amount]\n- call\n- fold\n- check")
       }
     }
     return move
