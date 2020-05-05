@@ -100,7 +100,9 @@ class ExpectimaxAgent(val name: String) extends Agent {
       num += 1
       val unknownCards = getUnknownCards(root.knownCards)
       val validMoves = List(Call(minAmt), Fold())
-      if (root.playerList.hasNext) {
+      if (root.playerList.hasNext && (root.isInstanceOf[PlayerNode] && root.asInstanceOf[PlayerNode].moveMade != Fold())) {
+//        val callKid = new PlayerNode(root, List.empty, nextPlayerList(root.playerList), Call(minAmt), root.knownCards)
+//        val foldKid = new PlayerNode(root, List.empty, nextPlayerList(root.playerList), Fold(), )
         val kids = validMoves.map(m => new PlayerNode(root, List.empty, nextPlayerList(root.playerList), m, root.knownCards))
         root.children = kids
         kids.foreach(k => buildTree(k, depth))
@@ -120,7 +122,8 @@ class ExpectimaxAgent(val name: String) extends Agent {
 
     try {
       val expectimaxVal = root.children.maxBy(expectimax(_, Nil)).asInstanceOf[PlayerNode].moveMade
-      println(expectimaxVal)
+      println("Yeet " + expectimaxVal)
+      root.children.map(c => (c.playerList.currentTurn.name, expectimax(c, Nil))).foreach(println)
       println(averageTimes(handTimes))
       println(iters)
       println(newSizes.distinct)
