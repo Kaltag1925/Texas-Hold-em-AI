@@ -18,9 +18,13 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
   shuffledDeck = shuffledDeck.drop(5)
 
   private var pot = 0
+  def getPot: Int = pot
+
   private var minimumRaise = 0
   private var cardsLeftToFlip = 5
   private val bets = mutable.Map.from(players.map(a => (a, 0)))
+
+  def getBets: mutable.Map[Agent, Int] = bets
 
   def getRiver(): List[Card] = {
     river.drop(cardsLeftToFlip)
@@ -72,34 +76,38 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
     var blindsIndex = if (doBlinds) 0 else 3
     var betRequirement = if (doBlinds) blinds else 0
     var firstBet = true
-    while ((firstBet || !players.isFirst) && players.size > 1) {
-      blindsIndex += 1
-      if (blindsIndex < 3 && doBlinds)
-        betRequirement = blinds / blindsIndex //TODO
-      firstBet = false
-      players.currentTurn.getMove(this, betRequirement, minimumRaise) match {
-        case Fold() =>
-          players.remove()
-          if (players.isFirst) {
-            firstBet = true
-          }
+    while ((firstBet || !players.isFirst) && players.size > 1 && !(players.inGame.count(!_.allIn()) <= 1)) {
+      if (!players.currentTurn.allIn()) {
+        blindsIndex += 1
+        if (blindsIndex < 3 && doBlinds)
+          betRequirement = blinds / blindsIndex //TODO
+        firstBet = false
+        players.currentTurn.getMove(this, betRequirement, minimumRaise) match {
+          case Fold() =>
+            players.remove()
+            if (players.isFirst) {
+              firstBet = true
+            }
 
-        case Raise(betAmt) =>
-          betRequirement = betRequirement max betAmt
-          players.updateStart()
-          pot += betAmt
-          bets(players.currentTurn) += betAmt
+          case Raise(betAmt) =>
+            betRequirement = betRequirement max betAmt
+            players.updateStart()
+            pot += betAmt
+            bets(players.currentTurn) += betAmt
 
-          players.next()
+            players.next()
 
-        case Check() =>
-          players.next()
+          case Check() =>
+            players.next()
 
-        case Call(betAmt) =>
-          pot += betAmt
-          bets(players.currentTurn) += betAmt
+          case Call(betAmt) =>
+            pot += betAmt
+            bets(players.currentTurn) += betAmt
 
-          players.next()
+            players.next()
+        }
+      } else {
+        players.next()
       }
     }
   }

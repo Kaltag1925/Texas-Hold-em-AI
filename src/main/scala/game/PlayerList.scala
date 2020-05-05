@@ -4,21 +4,30 @@ import agent.Agent
 
 import scala.collection.mutable
 
+/*
+  Doubly linked list for rotating player turns in order and allowing for reset of first player when betting
+ */
 class PlayerList(players: List[Agent], firstPlayer: Agent) {
   import PlayerList._
   private val _inGame: mutable.Buffer[Agent] = mutable.Buffer()
   _inGame.addAll(players)
   private var _size = players.size
   private var first = new Node(null, players.head, null)
+  private var firstTurn = true
   private var current = first
 
   {
     var c = first
-    for (p <- players.tail.init) {
-      c.next = new Node(c, p, null)
-      c = c.next
+    players.tail match {
+      case Nil =>
+      case _ =>
+        for (p <- players.tail.init) {
+          c.next = new Node(c, p, null)
+          c = c.next
+        }
     }
     c.next = new Node(c, players.last, first)
+    first.prev = c.next
 
     var rover = first.next
     var found = false
@@ -34,13 +43,19 @@ class PlayerList(players: List[Agent], firstPlayer: Agent) {
 
   def isFirst: Boolean = current == first
 
-  def reset(): Unit = current = first
+  def reset(): Unit = {
+    current = first
+    firstTurn = true
+  }
 
-  def hasNext: Boolean = current.next != first
+  def hasNext: Boolean = {
+    current != first || firstTurn
+  }
 
   def updateStart(): Unit = first = current
 
   def next(): Agent = {
+    firstTurn = false
     current = current.next
     current.data
   }
@@ -57,6 +72,7 @@ class PlayerList(players: List[Agent], firstPlayer: Agent) {
       _size -= 1
     } else {
       if (current == first) {
+        firstTurn = true
         first = current.next
       }
       current = current.next
