@@ -58,7 +58,7 @@ class Human(val name: String) extends Agent {
           move = Fold()
 
         case _ =>
-          println("Incorrect input try\n- raise [amount]\n- call\n- fold\n- check")
+          println("Incorrect input try\n- raise [amount]\n- call\n- fold")
       }
     }
     return move

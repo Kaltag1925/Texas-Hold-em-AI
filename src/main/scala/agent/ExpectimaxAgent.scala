@@ -93,17 +93,21 @@ class ExpectimaxAgent(val name: String) extends Agent {
 
         calls ::: raises ::: folds
       }
+      if(node.simRound.playerList.size > 1) {
       val unknownCards = getUnknownCards(node.knownCards)
-      if (node.simRound.playerList.hasNext) {
-        val moves = validMoves()
-        val kids = moves.map(m => new PlayerNode(node, List.empty, node.simRound.simulateMove(m), m, node.knownCards))
-        node.children = kids
-        kids.filter(k => (k.parent.simRound.playerList.currentTurn == this && k.moveMade != Fold()) || k.parent.simRound.playerList.currentTurn != this).foreach(k => buildTree(k))
-      } else {
-        if (node.knownCards.size < 7 ) {
-          val kids = unknownCards.map(c => new ChanceNode(node, List.empty, node.simRound.nextSet, c :: node.knownCards))
+        if (node.simRound.playerList.hasNext) {
+          val moves = validMoves()
+
+          val kids = moves.map(m => new PlayerNode(node, List.empty, node.simRound.simulateMove(m), m, node.knownCards))
           node.children = kids
-          kids.foreach(k => buildTree(k))
+          kids.filter(k => (k.parent.simRound.playerList.currentTurn == this && k.moveMade != Fold()) || k.parent.simRound.playerList.currentTurn != this).foreach(k => buildTree(k))
+
+        } else {
+          if (node.knownCards.size < 7) {
+            val kids = unknownCards.map(c => new ChanceNode(node, List.empty, node.simRound.nextSet, c :: node.knownCards))
+            node.children = kids
+            kids.foreach(k => buildTree(k))
+          }
         }
       }
     }
@@ -116,9 +120,16 @@ class ExpectimaxAgent(val name: String) extends Agent {
       val (maxChild, maxValue) = children.maxBy(_._2)
       val expectimaxVal = if (maxValue <= 0 && minAmt > 0) Fold() else maxChild.asInstanceOf[PlayerNode].moveMade
 
+      expectimaxVal match {
+        case Raise(betAmt) => moneyLeft -= betAmt
+        case Call(betAmt)  => moneyLeft -= betAmt
+        case _ =>
+      }
+
       println()
       println("----------------")
-      println(s"$name does $expectimaxVal")
+      println(s"$name does $expectimaxVal and has $moneyLeft")
+
       expectimaxVal
     } catch {
       case e: ClassCastException => throw new Exception ("Was a chance node not a player node") //should not ever happen
