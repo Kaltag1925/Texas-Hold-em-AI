@@ -11,19 +11,10 @@ case class Fold() extends Move(0) {
     s"Fold"
   }
 }
-case class Check() extends Move(0) {
-  override def toString: String = {
-    s"Check"
-  }
-}
+
 case class Call(betAmt: Int) extends Move(betAmt) {
   override def toString: String = {
     s"Call $betAmt"
-  }
-}
-case class AllIn(betAmt: Int) extends Move(betAmt) {
-  override def toString: String = {
-    s"All In"
   }
 }
 

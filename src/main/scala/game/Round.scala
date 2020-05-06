@@ -6,15 +6,14 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import game.Raise
 import game.Fold
-import game.Check
 import game.Call
 import agent.Agent
 
 class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
   val players = PlayerList(playersIn.toList)
 
-  private var shuffledDeck = util.Random.shuffle(Card.deck)
-  private val river = shuffledDeck.take(5)
+  private var shuffledDeck = util.Random.shuffle(Card.deck) //shuffle the cards
+  private val river = shuffledDeck.take(5) //cards to be flipped in the middle
   shuffledDeck = shuffledDeck.drop(5)
 
   private var pot = 0
@@ -44,10 +43,9 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
 
     cardsLeftToFlip -= 3
 
-    while ((players.size > 1 || players.forall(_.allIn())) && cardsLeftToFlip > -1) { //TODO
+    while ((players.size > 1 || players.forall(_.allIn())) && cardsLeftToFlip > -1) {
       playBetRound(false)
       cardsLeftToFlip -= 1
-      //println(cardsLeftToFlip)
     }
 
     val (winner, hand) = findWinner(players.inGame.map(p => (p, p.hand)), river)
@@ -80,7 +78,7 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
       if (!players.currentTurn.allIn()) {
         blindsIndex += 1
         if (blindsIndex < 3 && doBlinds)
-          betRequirement = blinds / blindsIndex //TODO
+          betRequirement = blinds / blindsIndex //handles blinds decrementing
         firstBet = false
         players.currentTurn.getMove(this, betRequirement, minimumRaise) match {
           case Fold() =>
@@ -95,9 +93,6 @@ class Round(blinds: Int, playersIn: ListBuffer[Agent]) {
             pot += betAmt
             bets(players.currentTurn) += betAmt
 
-            players.next()
-
-          case Check() =>
             players.next()
 
           case Call(betAmt) =>

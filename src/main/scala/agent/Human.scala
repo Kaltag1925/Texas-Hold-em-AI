@@ -5,13 +5,12 @@ import scala.io.StdIn._
 import game.Raise
 import game.Move
 import game.Fold
-import game.Check
 import game.Call
 import agent.Agent
 import game.Round
 
 class Human(val name: String) extends Agent {
-  private var moneyLeft = 1000
+  private var moneyLeft = 1000 //money available to bet
   var hand = null.asInstanceOf[List[Card]]
 
   def getMoney = moneyLeft
@@ -57,13 +56,6 @@ class Human(val name: String) extends Agent {
 
         case "fold" =>
           move = Fold()
-
-        case "check" =>
-          if (minBet > 0) {
-            println("cannot check")
-          } else {
-            move = Check()
-          }
 
         case _ =>
           println("Incorrect input try\n- raise [amount]\n- call\n- fold\n- check")

@@ -5,7 +5,7 @@ case class Card(suit: Suite.Value, num: CardNum.Value) extends Ordered[Card] {
 }
 
 object Card {
-  val deck: List[Card] = List(
+  val deck: List[Card] = List( //For speed, we are using just Diamonds and Hearts
 //    Card(Suite.Clubs, CardNum.Ace),
 //    Card(Suite.Clubs, CardNum.Two),
 //    Card(Suite.Clubs, CardNum.Three),

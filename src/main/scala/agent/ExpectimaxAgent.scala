@@ -7,25 +7,17 @@ class ExpectimaxAgent(val name: String) extends Agent {
   private var moneyLeft = 1000
   var hand = null.asInstanceOf[List[Card]]
 
-  val maxMoveTime = 10000
-
   def getUnknownCards(river: List[Card]): List[Card] = {
     Card.deck.diff(hand).diff(river)
   }
 
-  def nextPlayerList(list: PlayerList): PlayerList = {
+  def nextPlayerList(list: PlayerList): PlayerList = { //clones and increments PlayerList for tree nodes
     val next = list.clone
     next.next
     next
   }
 
-//  case class Time(start: Long, end: Long)
-//
-//  def averageTimes(times: List[Time]) = {
-//    times.map(t => (t.end - t.start)/1e9).sum / times.length
-//  }
-
-  def scoreHand(winningHand: WinningHand, pot: Int, standToLose: Int): Double = {
+  def scoreHand(winningHand: WinningHand, pot: Int, standToLose: Int): Double = { //scores explained in summary
     (winningHand match {
       case RoyalFlush(cards) => 25
       case StraightFlush(cards) => 16
@@ -50,23 +42,23 @@ class ExpectimaxAgent(val name: String) extends Agent {
 
     def expectimax(node: Node,  winningHands: List[WinningHand]): Double = {
       node match {
-        case _: ChanceNode =>
+        case _: ChanceNode =>   //If the node is a chance node
           node.children match {
-            case Nil => winningHands match {
+            case Nil => winningHands match { //No winningHands
               case Nil => 0
-              case _ => winningHands.map(scoreHand(_, node.simRound.pot, node.simRound.standToLose)).max
+              case _ => winningHands.map(scoreHand(_, node.simRound.pot, node.simRound.standToLose)).max //simulate round with new card
             }
 
-            case c =>
+            case c => // there are winningHands
               val newWinningHands = winningHands match {
                 case Nil => node.knownCards.combinations(5).map(WinningHand.apply).toList
                 case _ => getNewWinningHands(node.parent.knownCards, node.knownCards.diff(node.parent.knownCards))
               }
 
-              c.map(expectimax(_, newWinningHands ::: winningHands)).sum.toDouble / c.length
+              c.map(expectimax(_, newWinningHands ::: winningHands)).sum.toDouble / c.length //continue with new winningHands included in average
           }
-        case node: PlayerNode =>
-          if(node.parent.simRound.playerList.currentTurn != this) {
+        case node: PlayerNode => //If the node is a playerNode
+          if(node.parent.simRound.playerList.currentTurn != this) { //If it's the opponent
             node.children match {
               case Nil => winningHands match {
                 case Nil => if (node.knownCards.length < 5) 1 else node.knownCards.combinations(5).map(WinningHand.apply).map(scoreHand(_, node.simRound.pot, node.simRound.standToLose)).max
@@ -76,20 +68,20 @@ class ExpectimaxAgent(val name: String) extends Agent {
               case c => c.map(expectimax(_, winningHands)).sum.toDouble / c.length
             }
           } else {
-            node.children match {
+            node.children match { //if it's the agent
               case Nil => winningHands match {
                 case Nil => if (node.knownCards.length < 5) 1 else node.knownCards.combinations(5).map(WinningHand.apply).map(scoreHand(_, node.simRound.pot, node.simRound.standToLose)).max
                 case _ => winningHands.map(scoreHand(_, node.simRound.pot, node.simRound.standToLose)).max
               }
-              case _ => node.children.map(expectimax(_, winningHands)).max
+              case _ => node.children.map(expectimax(_, winningHands)).max //If there are children, pick the maximum
             }
           }
       }
     }
 
-    val maxNumBets = 2
+    val maxNumBets = 2 //limits bets per round to avoid "infinite" round length
 
-    def buildTree(node: Node): Unit = {
+    def buildTree(node: Node): Unit = { //builds game tree with chance nodes between betting rounds
       def validMoves(): List[Move] = {
         val currentPlayer = node.simRound.playerList.currentTurn
         val cash = node.simRound.moneyAmounts(currentPlayer)
@@ -123,18 +115,13 @@ class ExpectimaxAgent(val name: String) extends Agent {
       val children = root.children.map(n => (n, expectimax(n, Nil)))
       val (maxChild, maxValue) = children.maxBy(_._2)
       val expectimaxVal = if (maxValue <= 0 && minAmt > 0) Fold() else maxChild.asInstanceOf[PlayerNode].moveMade
-//      println("Yeet " + expectimaxVal)
-//      val x = root.children.map(c => (root.simRound.playerList.currentTurn.name, expectimax(c, Nil), c.asInstanceOf[PlayerNode].moveMade))
-//      x.foreach(println)
-//      println(round.getRiver())
-//      println(hand)
 
       println()
       println("----------------")
       println(s"$name does $expectimaxVal")
       expectimaxVal
     } catch {
-      case e: ClassCastException => throw new Exception ("Was a chance node not a player node")
+      case e: ClassCastException => throw new Exception ("Was a chance node not a player node") //should not ever happen
     }
 
 

@@ -64,7 +64,7 @@ class PlayerList(players: List[Agent], firstPlayer: Agent) {
 
   def remove(): Unit = {
     _inGame -= (current.data)
-    if (_size == 2) {
+    if (_size == 2) { //special case to handle switching from multiple players to just one player
       current = current.next
       current.prev = null
       current.next = null
